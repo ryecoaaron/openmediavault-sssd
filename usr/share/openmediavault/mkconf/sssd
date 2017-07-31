@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+# @license   http://www.gnu.org/licenses/gpl.html GPL Version 3
+# @author    Volker Theile <volker.theile@openmediavault.org>
+# @copyright Copyright (c) 2009-2017 Volker Theile
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+set -e
+
+. /etc/default/openmediavault
+. /usr/share/openmediavault/scripts/helper-functions
+
+OMV_SSSD_CONFIG=${OMV_SSSD_CONFIG:-"/etc/sssd/sssd.conf"}
+OMV_SSSD_CONFIG_TLS_CACERTDIR=${OMV_SSSD_CONFIG_TLS_CACERTDIR:-"/etc/ssl/certs"}
+OMV_SSSD_CONFIG_TLS_CACERT=${OMV_SSSD_CONFIG_TLS_CACERT:-"/etc/ssl/certs/ca-certificates.crt"}
+OMV_SSSD_CONFIG_TLS_REQCERT=${OMV_SSSD_CONFIG_TLS_REQCERT:-"demand"}
+OMV_SSSD_SSSDVERSION=${OMV_SSSD_SSSDVERSION:-"3"}
+OMV_SSSD_LIBNSS_CONFIG=${OMV_SSSD_LIBNSS_CONFIG:-"/etc/libnss-sssd.conf"}
+OMV_SSSD_LIBNSS_SECRET=${OMV_SSSD_LIBNSS_SECRET:-"/etc/libnss-sssd.secret"}
+OMV_SSSD_LIBNSS_BINDPOLICY=${OMV_SSSD_LIBNSS_BINDPOLICY:-"soft"}
+OMV_SSSD_PAM_CONFIG=${OMV_SSSD_PAM_CONFIG:-"/etc/pam_sssd.conf"}
+
+xmlstarlet sel -t \
+  -m "//services/sssd" \
+    -v "concat('base ',base)" -n \
+    -o "uri sssd" -i "enablessl[. = '1']" -o "s" -b -o "://" -v host -i "string-length(port) > 0" -v "concat(':',port)" -b -n \
+    -o "sssd_version ${OMV_SSSD_SSSDVERSION}" -n \
+    -v "concat('binddn ',rootbinddn)" -n \
+    -i "string-length(rootbindpw) > 0" \
+      -v "concat('bindpw ',rootbindpw)" -n \
+    -b \
+    -o "pam_password crypt" -n \
+  -b \
+  ${OMV_CONFIG_FILE} | xmlstarlet unesc > ${OMV_SSSD_PAM_CONFIG}
+chmod 600 ${OMV_SSSD_PAM_CONFIG}
+
+xmlstarlet sel -t \
+  -m "//services/sssd" \
+    -v "concat('BASE ',base)" -n \
+    -o "URI sssd" -i "enablessl[. = '1']" -o "s" -b -o "://" -v host -i "string-length(port) > 0" -v "concat(':',port)" -b -n \
+    -i "enablessl[. = '1']" \
+      -o "TLS_CACERTDIR ${OMV_SSSD_CONFIG_TLS_CACERTDIR}" -n \
+      -o "TLS_CACERT ${OMV_SSSD_CONFIG_TLS_CACERT}" -n \
+      -o "TLS_REQCERT ${OMV_SSSD_CONFIG_TLS_REQCERT}" -n \
+      -i "string-length(extraclientoptions) > 0" -v "extraclientoptions" -n \
+    -b \
+  -b \
+  ${OMV_CONFIG_FILE} | xmlstarlet unesc > ${OMV_SSSD_CONFIG}
+
+xmlstarlet sel -t \
+  -m "//services/sssd" \
+    -v "concat('base ',base)" -n \
+    -o "uri sssd" -i "enablessl[. = '1']" -o "s" -b -o "://" -v host -i "string-length(port) > 0" -v "concat(':',port)" -b -n \
+    -o "sssd_version ${OMV_SSSD_SSSDVERSION}" -n \
+    -v "concat('rootbinddn ',rootbinddn)" -n \
+    -o "bind_policy ${OMV_SSSD_LIBNSS_BINDPOLICY}" -n \
+    -v "concat('nss_base_passwd ',usersuffix,',',base)" -n \
+    -v "concat('nss_base_shadow ',usersuffix,',',base)" -n \
+    -v "concat('nss_base_group ',groupsuffix,',',base)" -n \
+    -i "string-length(extraoptions) > 0" -v "extraoptions" -n -b \
+  -b \
+  ${OMV_CONFIG_FILE} | xmlstarlet unesc > ${OMV_SSSD_LIBNSS_CONFIG}
+
+xmlstarlet sel -t \
+  -m "//services/sssd" \
+    -v "rootbindpw" -n \
+  -b \
+  ${OMV_CONFIG_FILE} | xmlstarlet unesc > ${OMV_SSSD_LIBNSS_SECRET}
+chmod 600 ${OMV_SSSD_LIBNSS_SECRET}

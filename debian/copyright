@@ -1,0 +1,12 @@
+Format: http://dep.debian.net/deps/dep5
+Upstream-Contact: OpenMediaVault Plugin Developers <plugins@omv-extras.org>
+Source: http://omv-extras.org
+
+Files: *
+Copyright: 2017 OpenMediaVault Plugin Developers <plugins@omv-extras.org>
+License: GPL-3
+
+Files: var/www/openmediavault/images/sssd.png
+       var/www/openmediavault/images/sssd.svg
+Copyright: WebHostingHub <http://www.webhostinghub.com>
+License: CC-BY-3.0

@@ -1,0 +1,25 @@
+Source: openmediavault-sssd
+Section: admin
+XB-Plugin-Section: network
+Priority: optional
+Maintainer: OpenMediaVault Plugin Developers <plugins@omv-extras.org>
+Build-Depends: debhelper (>> 7), gettext
+Standards-Version: 3.9.6
+Homepage: http://omv-extras.org
+
+Package: openmediavault-sssd
+Architecture: all
+Depends: krb5-config,
+         krb5-user,
+         libnss-sss,
+         libpam-sss,
+         libsasl2-modules-gssapi-mit,
+         libsss-sudo,
+         openmediavault (>= 3.0.82),
+         sssd,
+         sssd-tools
+Conflicts: openmediavault-ldap
+Priority: optional
+Description: sssd plugin for openmediavault
+ The System Security Services Daemon (SSSD) provides a set of daemons
+ to manage access to remote directories and authentication mechanisms.

@@ -1,0 +1,7 @@
+/openmediavault-ldap/
+/files
+/*.debhelper.log
+/*.postinst.debhelper
+/*.postrm.debhelper
+/*.substvars
+/*-stamp

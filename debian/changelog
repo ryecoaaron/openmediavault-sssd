@@ -1,0 +1,5 @@
+openmediavault-sssd (3.0) stable; urgency=low
+
+  * initial release
+
+ -- OpenMediaVault Plugin Developers <plugins@omv-extras.org>  Mon, 10 Apr 2017 17:12:41 +0200
